@@ -1,0 +1,6 @@
+com.spa.transport.model
+com.spa.transport.model.google.dir
+com.spa.transport.model.google.geo
+com.spa.transport.service
+com.spa.transport.service.rest
+com.spa.transport.test
