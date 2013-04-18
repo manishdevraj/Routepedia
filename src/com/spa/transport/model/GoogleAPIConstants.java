@@ -15,4 +15,7 @@ public class GoogleAPIConstants {
 	public final static String COMMA = ",";
 	public final static String APPLICATION_TYPE = "application/json";
 
+	public final static String OVER_QUERY_LIMIT = "OVER_QUERY_LIMIT";
+	public final static String OK = "OK";
+
 }

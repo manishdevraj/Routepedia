@@ -1,5 +1,7 @@
 package com.spa.transport.model;
 
+import com.spa.transport.model.google.geo.GeoLocation;
+
 /**
  * Location used to calculate shortest path
  * 
@@ -9,10 +11,12 @@ package com.spa.transport.model;
 public class Location {
 	final private String id;
 	final private String name;
+	private GeoLocation geoLocation;
 
-	public Location(String id, String name) {
+	public Location(String id, String name, GeoLocation geoLocation) {
 		this.id = id;
 		this.name = name;
+		this.geoLocation = geoLocation;
 	}
 
 	public String getId() {
@@ -51,5 +55,13 @@ public class Location {
 	@Override
 	public String toString() {
 		return name;
+	}
+
+	public GeoLocation getGeoLocation() {
+		return geoLocation;
+	}
+
+	public void setGeoLocation(GeoLocation geoLocation) {
+		this.geoLocation = geoLocation;
 	}
 }

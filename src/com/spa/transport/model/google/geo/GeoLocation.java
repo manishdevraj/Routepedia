@@ -29,4 +29,9 @@ public class GeoLocation {
 	public void setLng(double lng) {
 		this.lng = lng;
 	}
+
+	@Override
+	public String toString() {
+		return Double.toString(getLat()) + Double.toString(getLng());
+	}
 }

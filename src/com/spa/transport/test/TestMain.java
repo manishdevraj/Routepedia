@@ -1,10 +1,7 @@
 package com.spa.transport.test;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.Collections;
 import java.util.List;
 
 import junit.framework.Assert;
@@ -13,9 +10,8 @@ import org.junit.Test;
 
 import com.spa.transport.model.Location;
 import com.spa.transport.model.Path;
-import com.spa.transport.model.Route;
 import com.spa.transport.model.google.geo.GeoLocation;
-import com.spa.transport.service.DijkstraAlgorithm;
+import com.spa.transport.service.ShortestRoute;
 import com.spa.transport.service.rest.RestClient;
 
 public class TestMain {
@@ -49,56 +45,38 @@ public class TestMain {
 		restClient.getDirection(source, dest);
 	}
 
-	/**
-	 * Shortest Path test
-	 */
+	@Test
 	public void testShortestPath() {
+		RestClient restClient = new RestClient();
+		// initial input
+		ArrayList<String> addrList = new ArrayList<String>();
+		addrList.add("Kothrud,+Pune,+Maharashtra,+India");
+		addrList.add("Aundh,+Pune,+Maharashtra,+India");
+		addrList.add("Baner,+Pune,+Maharashtra,+India");
+		addrList.add("Pashan,+Pune,+Maharashtra,+India");
+		addrList.add("Deccan,+Pune,+Maharashtra,+India");
+
 		locations = new ArrayList<Location>();
-		paths = new ArrayList<Path>();
-		Location location = new Location("Node_0", "Hinjewadi");
-		locations.add(location);
-		location = new Location("Node_1", "Aundh");
-		locations.add(location);
-		location = new Location("Node_2", "Baner");
-		locations.add(location);
-		location = new Location("Node_3", "Kothrud");
-		locations.add(location);
-		location = new Location("Node_4", "Deccan");
-		locations.add(location);
 
-		addLane("H-A", 0, 1, 13);
-		addLane("H-B", 0, 2, 12);
-		addLane("H-K", 0, 3, 21);
-		// addLane("H-D", 0, 4, 19);
-
-		addLane("A-B", 1, 2, 5);
-		addLane("A-K", 1, 3, 10);
-		addLane("A-D", 1, 4, 7);
-
-		addLane("B-K", 2, 3, 12);
-		addLane("B-D", 2, 4, 10);
-
-		addLane("K-D", 3, 4, 4);
-
-		// Lets check from location Loc_1 to Loc_10
-		Route route = new Route(locations, paths);
-		DijkstraAlgorithm dijkstra = new DijkstraAlgorithm(route);
-		dijkstra.execute(locations.get(0));
-		LinkedList<Location> path = dijkstra.getPath(locations.get(4));
-
-		assertNotNull(path);
-		assertTrue(path.size() > 0);
-
-		for (Location loc : path) {
-			System.out.println(loc);
+		for (String address : addrList) {
+			// first of all verify all locations
+			GeoLocation geoLoc = restClient.verifyAddrLocation(address);
+			Assert.assertNotNull(geoLoc);
+			Location loc = new Location(geoLoc.toString(), address, geoLoc);
+			locations.add(loc);
 		}
+		// Add origin to our list
+		String srcAddress = "Hinjewadi,+Pune,+Maharashtra,+India";
+		GeoLocation geoSrcLoc = restClient.verifyAddrLocation(srcAddress);
+		Location mainSrcLoc = new Location(geoSrcLoc.toString(), srcAddress,
+				geoSrcLoc);
 
-	}
-
-	private void addLane(String laneId, int sourceLocNo, int destLocNo,
-			int duration) {
-		Path lane = new Path(laneId, locations.get(sourceLocNo),
-				locations.get(destLocNo), duration);
-		paths.add(lane);
+		ShortestRoute shortestRoute = new ShortestRoute();
+		List<Location> routes = shortestRoute.shortestJourney(mainSrcLoc,
+				locations);
+		Collections.reverse(routes);
+		for (Location loc : routes) {
+			System.out.println("Locations " + loc.getName());
+		}
 	}
 }

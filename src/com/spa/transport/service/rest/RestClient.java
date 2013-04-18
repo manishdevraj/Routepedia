@@ -45,7 +45,6 @@ public class RestClient {
 			Response rs = wc.get();
 			String sJSON;
 			sJSON = getStringFromInputStream((InputStream) rs.getEntity());
-			// System.out.println("sJSON : " + sJSON);
 			GeoDetails geoDetails = new Gson()
 					.fromJson(sJSON, GeoDetails.class);
 
@@ -54,19 +53,13 @@ public class RestClient {
 					Results geoResult = geoDetails.getResults().get(0);
 					Geometry geometry = geoResult.getGeometry();
 					loc = geometry.getLocation();
-					if (loc != null) {
-						System.out.println("Latitude :" + loc.getLat()
-								+ " Longitude :" + loc.getLng());
-					}
 				}
 			}
 		} catch (IllegalStateException e) {
-			// There has been some problem getting address details
 			System.out.println("Exception verifyAddLocation : "
 					+ e.getMessage());
 			e.printStackTrace();
 		} catch (Exception e) {
-			// There has been some problem getting address details
 			System.out.println("Exception verifyAddLocation : "
 					+ e.getMessage());
 			e.printStackTrace();
@@ -81,8 +74,8 @@ public class RestClient {
 	 * @param destination
 	 * @return GeoLocation returned from Google Map Direction API
 	 */
-	public GeoLocation getDirection(GeoLocation source, GeoLocation destination) {
-		GeoLocation loc = null;
+	public Legs getDirection(GeoLocation source, GeoLocation destination) {
+		Legs dirLegObject = null;
 		try {
 			String geoEndpoint = GoogleAPIConstants.DIRECTION_ENDPOINT
 					+ "?origin=" + source.getLat() + GoogleAPIConstants.COMMA
@@ -100,20 +93,34 @@ public class RestClient {
 			RouteDetails routeDetails = gson
 					.fromJson(sJSON, RouteDetails.class);
 			if (routeDetails != null && routeDetails.getRoutes() != null) {
-				if (routeDetails.getRoutes().size() > 0) {
-					Routes routes = routeDetails.getRoutes().get(0);
-					List<Legs> legs = routes.getLegs();
-					if (legs.size() > 0) {
-						Legs legObj = legs.get(0);
-						HashMap<String, String> distanceMap = legObj
-								.getDistance();
-						HashMap<String, String> duration = legObj.getDuration();
-						System.out.println("RouteDetails : "
-								+ distanceMap.get("text") + " "
-								+ duration.get("text"));
+				if (routeDetails.getStatus().equals(GoogleAPIConstants.OK)) {
+					if (routeDetails.getRoutes().size() > 0) {
+						Routes routes = routeDetails.getRoutes().get(0);
+						List<Legs> legs = routes.getLegs();
+						if (legs.size() > 0) {
+							Legs legObj = legs.get(0);
 
+							HashMap<String, String> distanceMap = legObj
+									.getDistance();
+							HashMap<String, String> duration = legObj
+									.getDuration();
+							System.out.println("RouteDetails : "
+									+ distanceMap.get("text") + " "
+									+ duration.get("text"));
+
+							System.out.println("RouteDetails : "
+									+ distanceMap.get("value") + " "
+									+ duration.get("value"));
+
+							dirLegObject = legObj;
+
+						}
 					}
+				} else if (routeDetails.getStatus().equals(
+						GoogleAPIConstants.OVER_QUERY_LIMIT)) {
+					System.out.println("RouteDetails Error: over query limit");
 				}
+
 			}
 
 		} catch (IllegalStateException e) {
@@ -123,7 +130,7 @@ public class RestClient {
 			System.out.println("Exception getDirection : " + e.getMessage());
 			e.printStackTrace();
 		}
-		return loc;
+		return dirLegObject;
 	}
 
 	/**
@@ -140,5 +147,4 @@ public class RestClient {
 		bos.close();
 		return bos.getOut().toString();
 	}
-
 }
